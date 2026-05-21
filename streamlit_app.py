@@ -18,6 +18,7 @@ st.write("Upload an image or use your camera to detect herbal plants.")
 # Load the model
 @st.cache_resource
 def load_model():
+    # Cache buster comment: load multi-class model version 2
     model = YOLO("best.pt")
     return model
 
