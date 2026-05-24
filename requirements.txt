@@ -1,5 +1,4 @@
 ultralytics==8.4.48
-opencv-python-headless
 numpy
 matplotlib
 scikit-learn

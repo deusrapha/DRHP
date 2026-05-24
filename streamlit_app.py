@@ -1,5 +1,4 @@
 import streamlit as st
-import cv2
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
@@ -38,8 +37,8 @@ def process_and_display(image):
     # Render the results on the image
     res_plotted = results[0].plot()
     
-    # Convert from BGR to RGB (ultralytics plot() returns BGR)
-    res_plotted_rgb = cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB)
+    # Convert from BGR to RGB using numpy slicing instead of cv2 (bypasses Streamlit Cloud import errors)
+    res_plotted_rgb = res_plotted[:, :, ::-1]
     
     st.image(res_plotted_rgb, caption="Detection Results", use_column_width=True)
     
