@@ -93,9 +93,8 @@ with tab1:
         
         st.image(image, caption="Uploaded Image", use_column_width=True)
         st.write("---")
-        if st.button("Detect Plants", key="detect_upload"):
-            with st.spinner("Processing..."):
-                process_and_display(image_np)
+        with st.spinner("Processing..."):
+            process_and_display(image_np)
 
 with tab2:
     st.header("Camera Input")
