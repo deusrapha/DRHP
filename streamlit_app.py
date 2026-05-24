@@ -54,6 +54,34 @@ def process_and_display(image):
                 conf = box.conf[0].item()
                 st.write(f"- **{class_name}**: {conf:.2%} confidence")
 
+    st.markdown("---")
+    st.subheader("👨‍🔬 Active Learning: Expert Feedback")
+    st.write("Did the model make a mistake? Help it learn by providing the correct label!")
+    
+    # Get list of classes from the model
+    class_names = list(model.names.values())
+    
+    # Dropdown for expert correction
+    correct_label = st.selectbox("Select the true plant species:", ["-- Select True Label --"] + class_names)
+    
+    if correct_label != "-- Select True Label --":
+        # Convert original numpy image to bytes for download
+        img_pil = Image.fromarray(image)
+        buf = io.BytesIO()
+        img_pil.save(buf, format="JPEG")
+        byte_im = buf.getvalue()
+        
+        # Create a safe filename using the true label
+        safe_label = correct_label.replace(" ", "_").replace("/", "_")
+        
+        st.download_button(
+            label=f"💾 Download Image as '{safe_label}'",
+            data=byte_im,
+            file_name=f"{safe_label}_expert_correction.jpg",
+            mime="image/jpeg",
+            help="Download this image with the correct label. You can then upload it to Roboflow to retrain and improve the model!"
+        )
+
 with tab1:
     st.header("Upload an Image")
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
