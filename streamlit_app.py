@@ -31,8 +31,8 @@ except Exception as e:
 tab1, tab2 = st.tabs(["Upload Image", "Camera Input"])
 
 def process_and_display(image):
-    # Perform inference
-    results = model(image)
+    # Perform inference with a 50% confidence threshold to filter out low-confidence mistakes
+    results = model(image, conf=0.5)
     
     # Render the results on the image
     res_plotted = results[0].plot()
