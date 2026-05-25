@@ -49,7 +49,7 @@ def process_and_display(image):
         if len(boxes) == 0:
             st.write("No herbal plants detected in this image.")
         else:
-            for box in boxes:
+            for i, box in enumerate(boxes):
                 class_id = int(box.cls[0].item())
                 class_name = model.names[class_id]
                 conf = box.conf[0].item()
@@ -63,9 +63,12 @@ def process_and_display(image):
                 
                 st.markdown(f"### 🌿 Prescription: {local_name}")
                 st.markdown(f"**Scientific Name:** _{sci_name}_")
-                st.markdown(f"**AI Confidence:** {conf:.2%}")
+                st.markdown(f"**DRHP Confidence:** {conf:.2%}")
                 st.markdown(f"**What it Heals:** {treats}")
                 st.markdown(f"**Administration & Preparation:** {prep}")
+                
+                if conf < 0.60:
+                    st.warning("Low confidence result. Please confirm with a trained herbal medicine expert before use.")
                 
                 # Generate PDF Prescription
                 pdf = FPDF()
@@ -76,7 +79,7 @@ def process_and_display(image):
                 pdf.ln(10)
                 pdf.cell(200, 10, txt=f"Local Name: {local_name}", ln=True)
                 pdf.cell(200, 10, txt=f"Scientific Name: {sci_name}", ln=True)
-                pdf.cell(200, 10, txt=f"AI Confidence: {conf:.2%}", ln=True)
+                pdf.cell(200, 10, txt=f"DRHP Confidence: {conf:.2%}", ln=True)
                 pdf.ln(10)
                 pdf.multi_cell(0, 10, txt=f"What it Treats:\n{treats}")
                 pdf.ln(5)
@@ -89,7 +92,8 @@ def process_and_display(image):
                     label=f"📄 Download PDF Prescription for {local_name}",
                     data=pdf_output,
                     file_name=f"{local_name.replace(' ', '_').replace('/', '_')}_Prescription.pdf",
-                    mime="application/pdf"
+                    mime="application/pdf",
+                    key=f"download_pdf_{i}_{local_name}"
                 )
 
     st.markdown("---")
