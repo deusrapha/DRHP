@@ -3,7 +3,8 @@ import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 import io
-
+from fpdf import FPDF
+from herb_dict import HERB_DICT
 # Set page config
 st.set_page_config(
     page_title="Herbal Plant Detection",
@@ -42,8 +43,8 @@ def process_and_display(image):
     
     st.image(res_plotted_rgb, caption="Detection Results", use_column_width=True)
     
-    # Display predictions details
-    with st.expander("Show Prediction Details", expanded=True):
+    # Display Doctor's Prescription Form
+    with st.expander("🩺 Doctor's Prescription Details", expanded=True):
         boxes = results[0].boxes
         if len(boxes) == 0:
             st.write("No herbal plants detected in this image.")
@@ -52,7 +53,44 @@ def process_and_display(image):
                 class_id = int(box.cls[0].item())
                 class_name = model.names[class_id]
                 conf = box.conf[0].item()
-                st.write(f"- **{class_name}**: {conf:.2%} confidence")
+                
+                # Fetch details from dictionary
+                herb_info = HERB_DICT.get(class_name, {})
+                local_name = herb_info.get('local_name', class_name)
+                sci_name = herb_info.get('scientific_name', 'Unknown')
+                treats = herb_info.get('treats', 'Consult herbalist')
+                prep = herb_info.get('preparation', 'Consult herbalist')
+                
+                st.markdown(f"### 🌿 Prescription: {local_name}")
+                st.markdown(f"**Scientific Name:** _{sci_name}_")
+                st.markdown(f"**AI Confidence:** {conf:.2%}")
+                st.markdown(f"**What it Heals:** {treats}")
+                st.markdown(f"**Administration & Preparation:** {prep}")
+                
+                # Generate PDF Prescription
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Arial", 'B', 16)
+                pdf.cell(200, 10, txt="DRHP - Herbal Medicine Prescription", ln=True, align='C')
+                pdf.set_font("Arial", '', 12)
+                pdf.ln(10)
+                pdf.cell(200, 10, txt=f"Local Name: {local_name}", ln=True)
+                pdf.cell(200, 10, txt=f"Scientific Name: {sci_name}", ln=True)
+                pdf.cell(200, 10, txt=f"AI Confidence: {conf:.2%}", ln=True)
+                pdf.ln(10)
+                pdf.multi_cell(0, 10, txt=f"What it Treats:\n{treats}")
+                pdf.ln(5)
+                pdf.multi_cell(0, 10, txt=f"Preparation & Administration:\n{prep}")
+                
+                # Save PDF to bytes for Streamlit Download
+                pdf_output = pdf.output(dest="S").encode("latin-1")
+                
+                st.download_button(
+                    label=f"📄 Download PDF Prescription for {local_name}",
+                    data=pdf_output,
+                    file_name=f"{local_name.replace(' ', '_').replace('/', '_')}_Prescription.pdf",
+                    mime="application/pdf"
+                )
 
     st.markdown("---")
     st.subheader("👨‍🔬 Active Learning: Expert Feedback")

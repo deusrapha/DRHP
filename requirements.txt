@@ -7,3 +7,4 @@ pillow
 numpy
 matplotlib
 scikit-learn
+fpdf2
