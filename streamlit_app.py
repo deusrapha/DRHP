@@ -82,8 +82,8 @@ def process_and_display(image):
                 pdf.ln(5)
                 pdf.multi_cell(0, 10, txt=f"Preparation & Administration:\n{prep}")
                 
-                # Save PDF to bytes for Streamlit Download
-                pdf_output = pdf.output(dest="S").encode("latin-1")
+                # Save PDF to bytes for Streamlit Download (fpdf2 returns a byte string)
+                pdf_output = pdf.output()
                 
                 st.download_button(
                     label=f"📄 Download PDF Prescription for {local_name}",
