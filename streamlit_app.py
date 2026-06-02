@@ -23,9 +23,13 @@ st.markdown(
         --background-color: #F1F8E9;
     }
     
-    /* Streamlit sidebar styling adjustments */
-    .css-1d391kg {
-        background-color: #F1F8E9 !important;
+    /* Sidebar Styling (Left Panel in Green Palette) */
+    [data-testid="stSidebar"] {
+        background-color: #E8F5E9 !important;
+        border-right: 2px solid #C8E6C9;
+    }
+    [data-testid="stSidebar"] .stMarkdown, [data-testid="stSidebar"] p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        color: #1B5E20 !important;
     }
     
     /* Buttons */
@@ -109,9 +113,9 @@ except Exception as e:
 # Setup main application tabs
 tab_diagnostics, tab_encyclopedia, tab_stats, tab_info = st.tabs([
     "🌿 Real-time Herb Diagnostics", 
-    "📖 Ethnobotanical Encyclopedia", 
-    "📊 Training & Model Statistics",
-    "💡 System Information & XAI"
+    "🌱 Ethnobotanical Encyclopedia", 
+    "📈 Training & Model Statistics",
+    "🧪 System Information & XAI"
 ])
 
 def process_and_display(image):
