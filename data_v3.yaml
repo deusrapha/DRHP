@@ -1,0 +1,24 @@
+path: C:\New folder\Local Disk\Masters MCS\SEM_II\Computer Vision\2026-19\dataset_v3\split
+train: train/images
+val: val/images
+test: test/images
+
+nc: 17
+names:
+  0: Akabombo Akatono - Cyphostemma adenocaule
+  1: Ebbombo - Momordica-foetida
+  2: Ekifumfumu - Leonotis leonurus
+  3: Entuntunu - Physalis-peruviana
+  4: Kamunye - Hoslundia-opposita
+  5: Kawunyila - Dysphania ambrosioides
+  6: Kayayana -Hoslundia-opposita
+  7: Kibwankulata -Plectranthus cyaneus
+  8: Mubiri - Plectranthus-Lamiaceae
+  9: Mugavu -Albizia coriaria
+  10: Mululuza - Vernonia-amygdalina
+  11: Nnabbbugira - Mentha aquatica
+  12: Ntaleyedungu - Zanthoxylum chalybeum
+  13: Olweza - Euphorbia-hirta
+  14: Omumbejja - Artemisia annua - Sweet Wormwood
+  15: Omwetango - Lambs-Quarters
+  16: Omwolola -Entada abyssinica

@@ -88,5 +88,41 @@ HERB_DICT = {
         "scientific_name": "Grevillea robusta",
         "treats": "Agroforestry/Shade (Non-medicinal primary)",
         "preparation": "Planted for shade and soil improvement rather than direct herbal administration."
+    },
+    "Mugavu -Albizia coriaria": {
+        "local_name": "Mugavu",
+        "scientific_name": "Albizia coriaria",
+        "treats": "Coughs, skin conditions, fever, and ripening bananas (traditional leaf wrapping)",
+        "preparation": "Prepare warm leaf decoctions or use the bark in tea infusions."
+    },
+    "Ntaleyedungu - Zanthoxylum chalybeum": {
+        "local_name": "Ntaleyedungu",
+        "scientific_name": "Zanthoxylum chalybeum",
+        "treats": "Persistent coughs, chest pain, sore throat, toothaches, malaria, and oral hygiene",
+        "preparation": "Boil bark or leaves for oral decoction, or peel/chew fresh thin branches as chewing sticks."
+    },
+    "Omwolola -Entada abyssinica": {
+        "local_name": "Omwolola",
+        "scientific_name": "Entada abyssinica",
+        "treats": "Gastrointestinal disorders, coughs, fevers, and wound healing",
+        "preparation": "Boil the bark or roots for decoctions, or crush leaves to apply on wounds."
+    },
+    "Nnabbugira – Mentha aquatica": {
+        "local_name": "Nnabbugira / Water Mint",
+        "scientific_name": "Mentha aquatica",
+        "treats": "Coughs, colds, fevers, digestive discomfort, and general health support",
+        "preparation": "Brew fresh or dried leaves into an aromatic herbal tea (kyayi), or steam/inhale vapor for congestion relief."
+    },
+    "Nnabbugira - Mentha aquatica": {
+        "local_name": "Nnabbugira / Water Mint",
+        "scientific_name": "Mentha aquatica",
+        "treats": "Coughs, colds, fevers, digestive discomfort, and general health support",
+        "preparation": "Brew fresh or dried leaves into an aromatic herbal tea (kyayi), or steam/inhale vapor for congestion relief."
+    },
+    "Nnabbugira -Mentha aquatica": {
+        "local_name": "Nnabbugira / Water Mint",
+        "scientific_name": "Mentha aquatica",
+        "treats": "Coughs, colds, fevers, digestive discomfort, and general health support",
+        "preparation": "Brew fresh or dried leaves into an aromatic herbal tea (kyayi), or steam/inhale vapor for congestion relief."
     }
 }
