@@ -15,6 +15,12 @@ st.set_page_config(
 st.title("🌿 Herbal Plant Detection and Recognition (DRHP)")
 st.write("Upload an image or use your camera to detect herbal plants.")
 
+# Sidebar settings for resizing images
+st.sidebar.header("🔧 Layout & Display Settings")
+st.sidebar.write("Customize how images are displayed on screen:")
+layout_mode = st.sidebar.selectbox("Layout Mode", ["Side-by-Side (Columns)", "Stacked (Standard)"])
+image_width = st.sidebar.slider("Image Display Width (px)", min_value=200, max_value=800, value=400, step=50)
+
 # Class-specific confidence thresholds to reduce false positives for rare/harder classes
 CLASS_THRESHOLDS = {
     "Mugavu -Albizia coriaria": 0.40,
@@ -74,7 +80,16 @@ def process_and_display(image):
     # Convert from BGR to RGB using numpy slicing instead of cv2 (bypasses Streamlit Cloud import errors)
     res_plotted_rgb = res_plotted[:, :, ::-1]
     
-    st.image(res_plotted_rgb, caption="Detection Results", use_column_width=True)
+    # Display images based on layout mode and size slider
+    if layout_mode == "Side-by-Side (Columns)":
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(image, caption="Original Input", width=image_width)
+        with col2:
+            st.image(res_plotted_rgb, caption="DRHP Detection Results", width=image_width)
+    else:
+        st.image(image, caption="Original Input", width=image_width)
+        st.image(res_plotted_rgb, caption="DRHP Detection Results", width=image_width)
     
     # Display Doctor's Prescription Form
     with st.expander("🩺 Doctor's Prescription Details", expanded=True):
@@ -82,7 +97,15 @@ def process_and_display(image):
         if len(boxes) == 0:
             st.write("No herbal plants detected in this image.")
         else:
-            for i, box in enumerate(boxes):
+            # Group boxes by class_id and keep the one with the maximum confidence to eliminate repetition
+            unique_detections = {}
+            for box in boxes:
+                class_id = int(box.cls[0].item())
+                conf = box.conf[0].item()
+                if class_id not in unique_detections or conf > unique_detections[class_id].conf[0].item():
+                    unique_detections[class_id] = box
+            
+            for i, box in enumerate(unique_detections.values()):
                 class_id = int(box.cls[0].item())
                 class_name = model.names[class_id]
                 conf = box.conf[0].item()
@@ -166,7 +189,6 @@ with tab1:
         # Convert to numpy array
         image_np = np.array(image)
         
-        st.image(image, caption="Uploaded Image", use_column_width=True)
         st.write("---")
         with st.spinner("Processing..."):
             process_and_display(image_np)
