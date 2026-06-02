@@ -199,7 +199,7 @@ def generate_diagnostic_report_pdf(selected_herbs):
     pdf.set_y(267)
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(120, 120, 120)
-    pdf.cell(0, 4, safe_text("DRHP Digital Herbarium * Kampala, Uganda * Support: info@drhp.org * Web: www.drhp.org"), ln=True, align='C')
+    pdf.cell(0, 4, safe_text("DRHP Digital Herbarium * Kampala, Uganda * Support: tumusiime.deus@students.mak.ac.ug * Web: www.drhp.org"), ln=True, align='C')
     
     return bytes(pdf.output())
 
