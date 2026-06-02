@@ -80,7 +80,8 @@ st.markdown(
 st.title("🌿 Herbal Plant Detection and Recognition (DRHP)")
 st.write("Automated identification and ethnobotanical diagnostics of indigenous Ugandan herbal plants.")
 
-# Sidebar settings for resizing images
+# Sidebar settings for resizing images and display
+st.sidebar.image("logo.png", width=120)
 st.sidebar.header("🔧 Layout & Display Settings")
 st.sidebar.write("Customize how images are displayed on screen:")
 layout_mode = st.sidebar.selectbox("Layout Mode", ["Side-by-Side (Columns)", "Stacked (Standard)"])
