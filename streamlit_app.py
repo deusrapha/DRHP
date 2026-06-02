@@ -3,8 +3,206 @@ import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 import io
+import datetime
+import random
 from fpdf import FPDF
 from herb_dict import HERB_DICT
+
+def safe_text(text):
+    if not isinstance(text, str):
+        return str(text)
+    replacements = {
+        '\u2018': "'",  # Left single quote
+        '\u2019': "'",  # Right single quote
+        '\u201c': '"',  # Left double quote
+        '\u201d': '"',  # Right double quote
+        '\u2013': '-',  # En dash
+        '\u2014': '-',  # Em dash
+        '\u2022': '*',  # Bullet point
+        '\u2122': 'TM', # Trademark
+        '\u00ae': '(R)',# Registered
+        '\u00a9': '(C)',# Copyright
+    }
+    for orig, rep in replacements.items():
+        text = text.replace(orig, rep)
+    return text.encode('latin-1', 'ignore').decode('latin-1')
+
+def generate_diagnostic_report_pdf(selected_herbs):
+    # Initialize PDF
+    pdf = FPDF(orientation='P', unit='mm', format='A4')
+    pdf.add_page()
+    
+    # Color palette
+    primary_green = (46, 125, 50)    # #2E7D32
+    forest_green = (27, 94, 32)     # #1B5E20
+    gray_text = (85, 85, 85)        # #555555
+    light_green = (232, 245, 233)   # #E8F5E9
+    
+    # 1. Header Logo & Institution Details
+    try:
+        pdf.image("logo.png", x=10, y=10, w=25)
+    except Exception:
+        # Fallback if image fails to load (draw clean text placeholder)
+        pdf.set_fill_color(*primary_green)
+        pdf.rect(10, 10, 25, 25, "F")
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_xy(10, 18)
+        pdf.cell(25, 5, "DRHP", align='C')
+        
+    # Title & Subtitle (x=38, y=12)
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_text_color(*forest_green)
+    pdf.set_xy(38, 12)
+    pdf.cell(0, 8, safe_text("DRHP - ETHNOBOTANICAL DIAGNOSTIC REPORT"), ln=True)
+    
+    pdf.set_font("Helvetica", "I", 9.5)
+    pdf.set_text_color(*gray_text)
+    pdf.set_x(38)
+    pdf.cell(0, 5, safe_text("Ugandan Indigenous Herbal Identification & Recommendation System"), ln=True)
+    
+    # Report Metadata (Top Right)
+    date_str = datetime.date.today().strftime("%B %d, %Y")
+    report_id = f"DRHP-REC-{random.randint(1000, 9999)}"
+    
+    pdf.set_xy(140, 12)
+    pdf.set_font("Helvetica", "", 10)
+    pdf.set_text_color(*gray_text)
+    pdf.cell(60, 5, safe_text(f"Date: {date_str}"), ln=True, align='R')
+    pdf.set_xy(140, 18)
+    pdf.cell(60, 5, safe_text(f"Report ID: {report_id}"), ln=True, align='R')
+    
+    # Header Divider Line
+    pdf.set_draw_color(*primary_green)
+    pdf.set_line_width(0.8)
+    pdf.line(10, 38, 200, 38)
+    
+    # 2. Diagnostic Summary Box
+    pdf.set_xy(10, 43)
+    pdf.set_fill_color(*light_green)
+    pdf.set_draw_color(*primary_green)
+    pdf.set_line_width(0.3)
+    pdf.rect(10, 43, 190, 26, "FD")
+    
+    pdf.set_font("Helvetica", "B", 10.5)
+    pdf.set_text_color(*forest_green)
+    pdf.set_xy(12, 45)
+    pdf.cell(95, 5, safe_text("DIAGNOSTIC STATUS"))
+    pdf.cell(95, 5, safe_text("CLASSIFICATION SUMMARY"))
+    
+    pdf.set_font("Helvetica", "", 9.5)
+    pdf.set_text_color(0, 0, 0)
+    
+    pdf.set_xy(12, 51)
+    pdf.cell(95, 5, safe_text("System Status: Species Identified Successfully"))
+    herb_list_str = ", ".join([h['local_name'] for h in selected_herbs])
+    pdf.cell(95, 5, safe_text(f"Identified Herb(s): {herb_list_str}"))
+    
+    pdf.set_xy(12, 56)
+    pdf.cell(95, 5, safe_text("Verification Method: YOLOv8 Instance Segmentation"))
+    sci_list_str = ", ".join([h['scientific_name'] for h in selected_herbs])
+    pdf.cell(95, 5, safe_text(f"Scientific Name: {sci_list_str}"))
+    
+    pdf.set_xy(12, 61)
+    pdf.cell(95, 5, safe_text(f"Diagnostic Date: {date_str}"))
+    conf_list_str = ", ".join([f"{h['confidence']:.2%}" for h in selected_herbs])
+    pdf.cell(95, 5, safe_text(f"Classification Confidence: {conf_list_str}"))
+    
+    # 3. Herb Recommendations Details
+    current_y = 74
+    
+    for herb in selected_herbs:
+        # Check if height overflows A4 page bounds
+        if current_y > 210:
+            pdf.add_page()
+            current_y = 15
+            
+        # Draw a clean header band for each herb
+        pdf.set_xy(10, current_y)
+        pdf.set_fill_color(241, 248, 233)  # #F1F8E9
+        pdf.set_draw_color(*primary_green)
+        pdf.rect(10, current_y, 190, 8, "FD")
+        
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_text_color(*forest_green)
+        pdf.set_xy(12, current_y + 1.5)
+        pdf.cell(100, 5, safe_text(f"Herb: {herb['local_name']} ({herb['scientific_name']})"))
+        pdf.set_font("Helvetica", "I", 9.5)
+        pdf.set_text_color(*gray_text)
+        pdf.cell(86, 5, safe_text(f"Model Confidence: {herb['confidence']:.2%}"), align='R')
+        
+        current_y += 10
+        
+        # Indications Section
+        pdf.set_xy(12, current_y)
+        pdf.set_font("Helvetica", "B", 9.5)
+        pdf.set_text_color(*forest_green)
+        pdf.cell(0, 5, safe_text("INDICATIONS & THERAPEUTIC PROPERTIES:"), ln=True)
+        
+        pdf.set_font("Helvetica", "", 9.5)
+        pdf.set_text_color(50, 50, 50)
+        pdf.set_x(12)
+        pdf.multi_cell(186, 5, safe_text(herb['treats']))
+        current_y = pdf.get_y() + 2
+        
+        # Preparation Section
+        pdf.set_xy(12, current_y)
+        pdf.set_font("Helvetica", "B", 9.5)
+        pdf.set_text_color(*forest_green)
+        pdf.cell(0, 5, safe_text("PREPARATION & DOSAGE METHODOLOGY:"), ln=True)
+        
+        pdf.set_font("Helvetica", "", 9.5)
+        pdf.set_text_color(50, 50, 50)
+        pdf.set_x(12)
+        pdf.multi_cell(186, 5, safe_text(herb['preparation']))
+        current_y = pdf.get_y() + 6
+        
+    # 4. Warnings and Disclaimers (Force to new page if it doesn't fit on this one)
+    if current_y > 230:
+        pdf.add_page()
+        current_y = 15
+        
+    pdf.set_xy(10, current_y)
+    pdf.set_fill_color(255, 243, 224)    # Light Orange #FFF3E0
+    pdf.set_draw_color(255, 152, 0)      # Orange border #FF9800
+    pdf.rect(10, current_y, 190, 14, "FD")
+    
+    pdf.set_font("Helvetica", "B", 8.5)
+    pdf.set_text_color(230, 81, 0)       # Deep Orange #E65100
+    pdf.set_xy(12, current_y + 1.5)
+    pdf.cell(0, 4, safe_text("BOTANICAL CLINICAL DISCLAIMER & RECOMMENDATION"), ln=True)
+    
+    pdf.set_font("Helvetica", "", 8)
+    pdf.set_text_color(80, 80, 80)
+    pdf.set_x(12)
+    pdf.multi_cell(186, 3.5, safe_text(
+        "This report is generated automatically by the DRHP Deep Learning Model based on image classification. "
+        "Herbal medicines possess active chemical compounds; please consult a certified phytotherapist or medical doctor to "
+        "validate dosage, interactions, and suitability."
+    ))
+    
+    # 5. System Verification / Signature Block
+    pdf.set_y(242)
+    pdf.set_draw_color(180, 180, 180)
+    pdf.set_line_width(0.3)
+    pdf.line(130, 247, 190, 247)
+    pdf.set_xy(130, 249)
+    pdf.set_font("Helvetica", "", 8.5)
+    pdf.set_text_color(*gray_text)
+    pdf.cell(60, 4, safe_text("System Verification Signature"), ln=True, align='C')
+    
+    # 6. Institutional Footer
+    pdf.set_y(265)
+    pdf.set_draw_color(*primary_green)
+    pdf.set_line_width(0.5)
+    pdf.line(10, 265, 200, 265)
+    pdf.set_y(267)
+    pdf.set_font("Helvetica", "", 8)
+    pdf.set_text_color(120, 120, 120)
+    pdf.cell(0, 4, safe_text("DRHP Digital Herbarium * Kampala, Uganda * Support: info@drhp.org * Web: www.drhp.org"), ln=True, align='C')
+    
+    return bytes(pdf.output())
+
 
 # Set page config
 st.set_page_config(
@@ -162,8 +360,8 @@ def process_and_display(image):
         st.image(image, caption="Original Input", width=image_width)
         st.image(res_plotted_rgb, caption="DRHP Detection Results", width=image_width)
     
-    # Display Doctor's Prescription Form
-    with st.expander("🩺 Doctor's Prescription Details", expanded=True):
+    # Display Diagnostic & Recommendation Details
+    with st.expander("🩺 Diagnostic & Recommendation Details", expanded=True):
         boxes = results[0].boxes
         if len(boxes) == 0:
             st.write("No herbal plants detected in this image.")
@@ -182,7 +380,7 @@ def process_and_display(image):
                 class_name = model.names[class_id]
                 detected_names.append(class_name)
                 
-            st.write("Select which detected species to keep for prescription details (uncheck false positives):")
+            st.write("Select which detected species to keep for recommendation details (uncheck false positives):")
             selected_names = st.multiselect(
                 "Detections:", 
                 options=detected_names, 
@@ -221,7 +419,7 @@ def process_and_display(image):
                     st.markdown(
                         f"""
                         <div class="herb-card">
-                            <h3 style="color: #1B5E20; margin-top: 0; margin-bottom: 8px;">🌿 Prescription: {local_name}</h3>
+                            <h3 style="color: #1B5E20; margin-top: 0; margin-bottom: 8px;">🌿 Recommendation: {local_name}</h3>
                             <p style="margin: 4px 0;"><b>Scientific Name:</b> <i>{sci_name}</i></p>
                             <p style="margin: 4px 0;"><b>DRHP Confidence:</b> <span style="color: #2E7D32; font-weight: bold;">{conf:.2%}</span></p>
                             <p style="margin: 4px 0;"><b>What it Heals:</b> {treats}</p>
@@ -234,33 +432,65 @@ def process_and_display(image):
                     if conf < 0.60:
                         st.warning("Low confidence result. Please confirm with a trained herbal medicine expert before use.")
                     
-                    # Generate PDF Prescription
-                    pdf = FPDF()
-                    pdf.add_page()
-                    pdf.set_font("Arial", 'B', 16)
-                    pdf.cell(200, 10, txt="DRHP - Herbal Medicine Prescription", ln=True, align='C')
-                    pdf.set_font("Arial", '', 12)
-                    pdf.ln(10)
-                    pdf.cell(200, 10, txt=f"Local Name: {local_name}", ln=True)
-                    pdf.cell(200, 10, txt=f"Scientific Name: {sci_name}", ln=True)
-                    pdf.cell(200, 10, txt=f"DRHP Confidence: {conf:.2%}", ln=True)
-                    pdf.ln(10)
-                    pdf.multi_cell(0, 10, txt=f"What it Treats:\n{treats}")
-                    pdf.ln(5)
-                    pdf.multi_cell(0, 10, txt=f"Preparation & Administration:\n{prep}")
-                    
-                    # Save PDF to bytes for Streamlit Download
-                    pdf_output = bytes(pdf.output())
+                    # Generate PDF Diagnostic Report for individual herb
+                    herb_pdf_data = [{
+                        'local_name': local_name,
+                        'scientific_name': sci_name,
+                        'confidence': conf,
+                        'treats': treats,
+                        'preparation': prep
+                    }]
+                    pdf_output = generate_diagnostic_report_pdf(herb_pdf_data)
                     
                     st.download_button(
-                        label=f"📄 Download PDF Prescription for {local_name}",
+                        label=f"📄 Download Diagnostic Report for {local_name}",
                         data=pdf_output,
-                        file_name=f"{local_name.replace(' ', '_').replace('/', '_')}_Prescription.pdf",
+                        file_name=f"{local_name.replace(' ', '_').replace('/', '_')}_Diagnostic_Report.pdf",
                         mime="application/pdf",
                         key=f"download_pdf_{i}_{local_name}"
                     )
                     
                     st.write("---")
+                
+                # Unified Diagnostic Report for all selected herbs
+                if len(selected_names) > 1:
+                    st.markdown("<h3 style='color: #1B5E20;'>📄 Consolidated Diagnostic Report</h3>", unsafe_allow_html=True)
+                    st.write("Generate a unified formal report containing recommendation details for all selected species:")
+                    
+                    # Gather details for all selected herbs
+                    selected_herbs_data = []
+                    for name in selected_names:
+                        # Find corresponding box in unique_detections
+                        box = None
+                        for b in unique_detections.values():
+                            cid = int(b.cls[0].item())
+                            if model.names[cid] == name:
+                                box = b
+                                break
+                        if box is not None:
+                            class_id = int(box.cls[0].item())
+                            class_name = model.names[class_id]
+                            conf = box.conf[0].item()
+                            herb_info = HERB_DICT.get(class_name, {})
+                            selected_herbs_data.append({
+                                'local_name': herb_info.get('local_name', class_name),
+                                'scientific_name': herb_info.get('scientific_name', 'Unknown'),
+                                'confidence': conf,
+                                'treats': herb_info.get('treats', 'Consult herbalist'),
+                                'preparation': herb_info.get('preparation', 'Consult herbalist')
+                            })
+                    
+                    if selected_herbs_data:
+                        unified_pdf_bytes = generate_diagnostic_report_pdf(selected_herbs_data)
+                        
+                        st.download_button(
+                            label="📥 Download Unified Ethnobotanical Report (All Detections)",
+                            data=unified_pdf_bytes,
+                            file_name="Unified_Ethnobotanical_Diagnostic_Report.pdf",
+                            mime="application/pdf",
+                            key="download_unified_pdf_report"
+                        )
+                        st.write("---")
 
     st.subheader("👨‍🔬 Active Learning: Expert Feedback")
     st.write("Did the model make a mistake? Help it learn by providing the correct label!")
