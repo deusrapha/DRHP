@@ -27,7 +27,7 @@ def safe_text(text):
         text = text.replace(orig, rep)
     return text.encode('latin-1', 'ignore').decode('latin-1')
 
-def generate_diagnostic_report_pdf(selected_herbs):
+def generate_diagnostic_report_pdf(selected_herbs, report_type="detection"):
     # Initialize PDF
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.add_page()
@@ -54,7 +54,10 @@ def generate_diagnostic_report_pdf(selected_herbs):
     pdf.set_font("Helvetica", "B", 16)
     pdf.set_text_color(*forest_green)
     pdf.set_xy(38, 12)
-    pdf.cell(0, 8, safe_text("DRHP - ETHNOBOTANICAL DIAGNOSTIC REPORT"), ln=True)
+    if report_type == "detection":
+        pdf.cell(0, 8, safe_text("DRHP - ETHNOBOTANICAL DIAGNOSTIC REPORT"), ln=True)
+    else:
+        pdf.cell(0, 8, safe_text("DRHP - ETHNOBOTANICAL RECOMMENDATION REPORT"), ln=True)
     
     pdf.set_font("Helvetica", "I", 9.5)
     pdf.set_text_color(*gray_text)
@@ -87,26 +90,42 @@ def generate_diagnostic_report_pdf(selected_herbs):
     pdf.set_font("Helvetica", "B", 10.5)
     pdf.set_text_color(*forest_green)
     pdf.set_xy(12, 45)
-    pdf.cell(95, 5, safe_text("DIAGNOSTIC STATUS"))
-    pdf.cell(95, 5, safe_text("CLASSIFICATION SUMMARY"))
+    if report_type == "detection":
+        pdf.cell(95, 5, safe_text("DIAGNOSTIC STATUS"))
+        pdf.cell(95, 5, safe_text("CLASSIFICATION SUMMARY"))
+    else:
+        pdf.cell(95, 5, safe_text("RECOMMENDATION STATUS"))
+        pdf.cell(95, 5, safe_text("SYMPTOM MATCH SUMMARY"))
     
     pdf.set_font("Helvetica", "", 9.5)
     pdf.set_text_color(0, 0, 0)
     
     pdf.set_xy(12, 51)
-    pdf.cell(95, 5, safe_text("System Status: Species Identified Successfully"))
-    herb_list_str = ", ".join([h['local_name'] for h in selected_herbs])
-    pdf.cell(95, 5, safe_text(f"Identified Herb(s): {herb_list_str}"))
+    if report_type == "detection":
+        pdf.cell(95, 5, safe_text("System Status: Species Identified Successfully"))
+        herb_list_str = ", ".join([h['local_name'] for h in selected_herbs])
+        pdf.cell(95, 5, safe_text(f"Identified Herb(s): {herb_list_str}"))
+    else:
+        pdf.cell(95, 5, safe_text("System Status: Symptoms Matched Successfully"))
+        herb_list_str = ", ".join([h['local_name'] for h in selected_herbs])
+        pdf.cell(95, 5, safe_text(f"Recommended Herb(s): {herb_list_str}"))
     
     pdf.set_xy(12, 56)
-    pdf.cell(95, 5, safe_text("Verification Method: YOLOv8 Instance Segmentation"))
+    if report_type == "detection":
+        pdf.cell(95, 5, safe_text("Verification Method: YOLOv8 Instance Segmentation"))
+    else:
+        pdf.cell(95, 5, safe_text("Verification Method: Symptom-Based Database Match"))
     sci_list_str = ", ".join([h['scientific_name'] for h in selected_herbs])
     pdf.cell(95, 5, safe_text(f"Scientific Name: {sci_list_str}"))
     
     pdf.set_xy(12, 61)
     pdf.cell(95, 5, safe_text(f"Diagnostic Date: {date_str}"))
-    conf_list_str = ", ".join([f"{h['confidence']:.2%}" for h in selected_herbs])
-    pdf.cell(95, 5, safe_text(f"Classification Confidence: {conf_list_str}"))
+    if report_type == "detection":
+        conf_list_str = ", ".join([f"{h['confidence']:.2%}" for h in selected_herbs])
+        pdf.cell(95, 5, safe_text(f"Classification Confidence: {conf_list_str}"))
+    else:
+        conf_list_str = ", ".join([safe_text(h['confidence']) for h in selected_herbs])
+        pdf.cell(95, 5, safe_text(f"Match Level: {conf_list_str}"))
     
     # 3. Herb Recommendations Details
     current_y = 74
@@ -129,7 +148,10 @@ def generate_diagnostic_report_pdf(selected_herbs):
         pdf.cell(100, 5, safe_text(f"Herb: {herb['local_name']} ({herb['scientific_name']})"))
         pdf.set_font("Helvetica", "I", 9.5)
         pdf.set_text_color(*gray_text)
-        pdf.cell(86, 5, safe_text(f"Model Confidence: {herb['confidence']:.2%}"), align='R')
+        if report_type == "detection":
+            pdf.cell(86, 5, safe_text(f"Model Confidence: {herb['confidence']:.2%}"), align='R')
+        else:
+            pdf.cell(86, 5, safe_text(f"Match Relevance: {herb['confidence']}"), align='R')
         
         current_y += 10
         
@@ -176,7 +198,7 @@ def generate_diagnostic_report_pdf(selected_herbs):
     pdf.set_text_color(80, 80, 80)
     pdf.set_x(12)
     pdf.multi_cell(186, 3.5, safe_text(
-        "This report is generated automatically by the DRHP Deep Learning Model based on image classification. "
+        "This report is generated automatically by the DRHP Deep Learning Model based on image classification or symptom keywords match. "
         "Herbal medicines possess active chemical compounds; please consult a certified phytotherapist or medical doctor to "
         "validate dosage, interactions, and suitability."
     ))
@@ -202,6 +224,85 @@ def generate_diagnostic_report_pdf(selected_herbs):
     pdf.cell(0, 4, safe_text("DRHP Digital Herbarium * Kampala, Uganda * Support: tumusiime.deus@students.mak.ac.ug * Web: www.drhp.org"), ln=True, align='C')
     
     return bytes(pdf.output())
+
+
+def find_matching_herbs(query_text, selected_categories):
+    # Normalize query text
+    query_words = set(query_text.lower().split()) if query_text else set()
+    
+    # Mapping categories to keywords
+    category_keywords = {
+        "Fever / Malaria": ["fever", "fevers", "malaria", "malarial", "febrile"],
+        "Cough / Cold / Respiratory": ["cough", "coughs", "cold", "colds", "congestion", "respiratory", "asthma", "bronchitis", "throat", "throats", "chest", "bronchial"],
+        "Stomach / Digestive Ailments": ["stomach", "digestive", "colic", "gastrointestinal", "diarrhea", "constipation", "ache", "aches", "discomfort", "intestine", "intestinal"],
+        "Skin Irritations / Wounds": ["skin", "wound", "wounds", "irritation", "irritations", "disease", "diseases", "conditions", "topical", "irritated", "cleansing"],
+        "Toothache / Oral Health": ["tooth", "toothache", "toothaches", "oral", "hygiene", "teeth", "mouth"],
+        "Maternal / Infant Health": ["maternal", "infant", "child", "colic", "mother", "baby", "womb", "birth"],
+        "Pain / Inflammation": ["pain", "inflammation", "ache", "aches", "sore", "irritation", "inflammatory"]
+    }
+    
+    keywords_from_categories = []
+    for cat in selected_categories:
+        keywords_from_categories.extend(category_keywords.get(cat, []))
+        
+    all_target_keywords = query_words.union(set(keywords_from_categories))
+    
+    # Remove extremely common stopwords
+    stopwords = {"and", "the", "a", "of", "to", "in", "for", "with", "or", "on", "at", "by", "an", "i", "have", "my", "tell", "symptoms", "pain", "is", "some", "we", "can", "recommend", "heals", "treats", "how"}
+    target_keywords = {w.strip(".,?!();:-\"'") for w in all_target_keywords if w.strip(".,?!();:-\"'") not in stopwords and len(w) > 2}
+    
+    results = []
+    for herb_key, info in HERB_DICT.items():
+        # Skip Grevillea robusta (Silky Oak) if it is purely agroforestry and doesn't match specific query keywords
+        if herb_key == "Silky Oak - Grevillea robusta" and not any(kw in query_text.lower() for kw in ["oak", "grevillea", "robust", "shade"]):
+            continue
+            
+        local_name = info.get('local_name', herb_key)
+        scientific_name = info.get('scientific_name', '')
+        treats = info.get('treats', '').lower()
+        prep = info.get('preparation', '').lower()
+        
+        score = 0
+        matches = []
+        
+        for kw in target_keywords:
+            kw_match = False
+            # Check treats
+            if kw in treats:
+                score += 3  # High weight for matching treats
+                kw_match = True
+            # Check preparation
+            if kw in prep:
+                score += 1
+                kw_match = True
+            # Check local or scientific name
+            if kw in local_name.lower() or kw in scientific_name.lower():
+                score += 2
+                kw_match = True
+                
+            if kw_match:
+                matches.append(kw)
+                
+        if score > 0:
+            results.append({
+                "herb_key": herb_key,
+                "local_name": local_name,
+                "scientific_name": scientific_name,
+                "treats": info.get('treats', ''),
+                "preparation": info.get('preparation', ''),
+                "score": score,
+                "matched_keywords": matches
+            })
+            
+    # Deduplicate results based on (local_name, scientific_name) to avoid duplicates
+    unique_results = {}
+    for r in results:
+        key = (r['local_name'], r['scientific_name'])
+        if key not in unique_results or r['score'] > unique_results[key]['score']:
+            unique_results[key] = r
+            
+    sorted_results = sorted(unique_results.values(), key=lambda x: x['score'], reverse=True)
+    return sorted_results
 
 
 # Set page config
@@ -310,8 +411,9 @@ except Exception as e:
     st.stop()
 
 # Setup main application tabs
-tab_diagnostics, tab_encyclopedia, tab_stats, tab_info = st.tabs([
+tab_diagnostics, tab_symptoms, tab_encyclopedia, tab_stats, tab_info = st.tabs([
     "🌿 Real-time Herb Diagnostics", 
+    "🩺 Symptom-based Finder",
     "🌱 Ethnobotanical Encyclopedia", 
     "📈 Training & Model Statistics",
     "🧪 System Information & XAI"
@@ -551,6 +653,154 @@ with tab_diagnostics:
             st.write("---")
             with st.spinner("Processing..."):
                 process_and_display(image_np)
+
+# Populate Symptom Tab
+with tab_symptoms:
+    st.header("🩺 Symptom-based Herb Finder")
+    st.write(
+        "Enter details about symptoms, pain, or ailments below. "
+        "The system will search our ethnobotanical database and recommend traditional Ugandan herbal medicines, "
+        "detailing their usage, preparation, and administration instructions."
+    )
+    
+    st.warning(
+        "⚠️ **CRITICAL BOTANICAL CLINICAL DISCLAIMER:** "
+        "The recommendations generated below are based on traditional ethnobotanical uses and automated database keyword mapping. "
+        "Herbal medicines contain active chemical and pharmacological compounds. "
+        "These recommendations are NOT a substitute for professional medical advice, diagnosis, or treatment. "
+        "Always consult a certified phytotherapist, medical doctor, or healthcare professional "
+        "to validate dosage, suitability, and potential drug interactions before administering any herbal treatments."
+    )
+    
+    col_input, col_tips = st.columns([2, 1])
+    with col_input:
+        st.subheader("🔍 Search Parameters")
+        
+        selected_categories = st.multiselect(
+            "Select symptom categories (optional):",
+            options=[
+                "Fever / Malaria",
+                "Cough / Cold / Respiratory",
+                "Stomach / Digestive Ailments",
+                "Skin Irritations / Wounds",
+                "Toothache / Oral Health",
+                "Maternal / Infant Health",
+                "Pain / Inflammation"
+            ],
+            help="Select one or more categories to quickly find matching herbs."
+        )
+        
+        query_text = st.text_area(
+            "Describe the symptoms, pain, or discomfort in detail:",
+            placeholder="e.g., I have a persistent cough with a sore throat and chest congestion, or severe stomach pain.",
+            height=120
+        )
+        
+        search_triggered = st.button("✨ Find Recommended Herbs")
+        
+    with col_tips:
+        st.subheader("💡 Tips for Searching")
+        st.markdown(
+            """
+            - **Be Specific:** Describe the exact nature of the pain (e.g., *cough*, *fever*, *stomach ache*, *skin irritation*).
+            - **Traditional Names:** You can also query using traditional Luganda/Ugandan symptoms if known.
+            - **Combined Selection:** Using both tags and a text description provides the most accurate search results.
+            - **Doctor Advisory:** Note down the recommended herbs to discuss with a certified professional.
+            """
+        )
+        
+    if search_triggered or query_text or selected_categories:
+        if not query_text and not selected_categories:
+            st.info("Please enter a symptom description or select a category tag to begin.")
+        else:
+            with st.spinner("Searching ethnobotanical database..."):
+                matches = find_matching_herbs(query_text, selected_categories)
+                
+                if not matches:
+                    st.error("No matching herbs found for the specified symptoms. Please refine your query or try selecting different categories.")
+                else:
+                    st.success(f"Found {len(matches)} matching herb(s) based on your symptoms:")
+                    st.write("---")
+                    
+                    matched_herbs_pdf_data = []
+                    
+                    for idx, match in enumerate(matches):
+                        local_name = match['local_name']
+                        sci_name = match['scientific_name']
+                        treats = match['treats']
+                        prep = match['preparation']
+                        score = match['score']
+                        matched_kws = match['matched_keywords']
+                        
+                        # Map scores to a match level text/relevance
+                        if score >= 6:
+                            match_level = "High Match"
+                            match_color = "#2E7D32" # Dark Green
+                        elif score >= 3:
+                            match_level = "Medium Match"
+                            match_color = "#F57C00" # Orange
+                        else:
+                            match_level = "Partial Match"
+                            match_color = "#1565C0" # Blue
+                            
+                        matched_kws_str = ", ".join(matched_kws)
+                        
+                        st.markdown(
+                            f"""
+                            <div class="herb-card" style="border-left: 5px solid {match_color};">
+                                <h3 style="color: #1B5E20; margin-top: 0; margin-bottom: 8px;">🌿 {local_name}</h3>
+                                <p style="margin: 4px 0;"><b>Scientific Name:</b> <i>{sci_name}</i></p>
+                                <p style="margin: 4px 0;"><b>Relevance Level:</b> <span style="color: {match_color}; font-weight: bold;">{match_level}</span> (matched: <i>{matched_kws_str}</i>)</p>
+                                <p style="margin: 4px 0;"><b>What it Heals:</b> {treats}</p>
+                                <p style="margin: 4px 0;"><b>Administration & Preparation:</b> {prep}</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                        
+                        st.warning(
+                            f"⚠️ **Caution for {local_name}:** Do not self-prescribe. Consult a medical doctor to discuss appropriate dosage and any contraindications for treating *{treats}*."
+                        )
+                        
+                        matched_herbs_pdf_data.append({
+                            'local_name': local_name,
+                            'scientific_name': sci_name,
+                            'confidence': match_level,
+                            'treats': treats,
+                            'preparation': prep
+                        })
+                        
+                        single_pdf = generate_diagnostic_report_pdf([{
+                            'local_name': local_name,
+                            'scientific_name': sci_name,
+                            'confidence': match_level,
+                            'treats': treats,
+                            'preparation': prep
+                        }], report_type="symptom")
+                        
+                        st.download_button(
+                            label=f"📄 Download Recommendation Report for {local_name}",
+                            data=single_pdf,
+                            file_name=f"{local_name.replace(' ', '_').replace('/', '_')}_Recommendation_Report.pdf",
+                            mime="application/pdf",
+                            key=f"symptom_pdf_{idx}_{local_name}"
+                        )
+                        st.write("---")
+                        
+                    if len(matched_herbs_pdf_data) > 1:
+                        st.markdown("<h3 style='color: #1B5E20;'>📄 Consolidated Recommendation Report</h3>", unsafe_allow_html=True)
+                        st.write("Generate a single, unified ethnobotanical recommendation report containing all matching species:")
+                        
+                        unified_pdf = generate_diagnostic_report_pdf(matched_herbs_pdf_data, report_type="symptom")
+                        
+                        st.download_button(
+                            label="📥 Download Unified Ethnobotanical Recommendation Report",
+                            data=unified_pdf,
+                            file_name="Unified_Ethnobotanical_Recommendation_Report.pdf",
+                            mime="application/pdf",
+                            key="download_unified_symptom_report"
+                        )
+                        st.write("---")
 
 # Populate Encyclopedia Tab
 with tab_encyclopedia:
