@@ -312,72 +312,269 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom styling using a green color palette
+# Custom styling using an ultra-premium green & slate color palette
 st.markdown(
     """
     <style>
-    /* Green theme styling */
-    :root {
-        --primary-color: #2E7D32;
-        --background-color: #F1F8E9;
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+    
+    /* Global Styles */
+    html, body, [data-testid="stAppViewContainer"], .main {
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        background-color: #F7FAF6 !important;
+        color: #2D3748 !important;
     }
     
-    /* Sidebar Styling (Left Panel in Green Palette) */
+    /* Sidebar Overhaul */
     [data-testid="stSidebar"] {
-        background-color: #E8F5E9 !important;
-        border-right: 2px solid #C8E6C9;
+        background-color: rgba(241, 248, 233, 0.7) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border-right: 1px solid rgba(200, 230, 201, 0.4) !important;
     }
-    [data-testid="stSidebar"] .stMarkdown, [data-testid="stSidebar"] p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+    
+    /* Clean, Styled Headings */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
         color: #1B5E20 !important;
+        letter-spacing: -0.5px !important;
     }
     
-    /* Buttons */
-    .stButton>button {
-        background-color: #2E7D32 !important;
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #F1F8E9;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #C8E6C9;
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #A5D6A7;
+    }
+    
+    /* Premium Styled Buttons */
+    .stButton>button, .stDownloadButton>button {
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%) !important;
         color: white !important;
-        border-radius: 8px !important;
-        border: none !important;
-        font-weight: bold !important;
-        padding: 8px 16px !important;
-        transition: background-color 0.3s ease;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        font-weight: 600 !important;
+        padding: 10px 24px !important;
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        text-transform: none !important;
+        font-size: 14px !important;
+        cursor: pointer !important;
+        height: auto !important;
     }
-    .stButton>button:hover {
-        background-color: #1B5E20 !important;
-        box-shadow: 0px 4px 10px rgba(46, 125, 50, 0.3) !important;
+    .stButton>button:hover, .stDownloadButton>button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(46, 125, 50, 0.35) !important;
+        background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    .stButton>button:active, .stDownloadButton>button:active {
+        transform: translateY(0px) !important;
+        box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2) !important;
     }
     
-    /* Tabs styling */
+    /* Styled Inputs & Text Areas */
+    div[data-baseweb="select"] > div, input, textarea {
+        background-color: white !important;
+        border-radius: 12px !important;
+        border: 1px solid #E2E8F0 !important;
+        transition: all 0.3s ease !important;
+        color: #2D3748 !important;
+    }
+    div[data-baseweb="select"] > div:hover, input:hover, textarea:hover {
+        border-color: #A5D6A7 !important;
+    }
+    div[data-baseweb="select"]:focus-within > div, input:focus, textarea:focus {
+        border-color: #2E7D32 !important;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+    }
+    
+    /* Premium Tab Bar */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 12px !important;
+        background-color: rgba(232, 245, 233, 0.5) !important;
+        padding: 8px !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(200, 230, 201, 0.4) !important;
+        margin-bottom: 24px !important;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: #E8F5E9;
-        border-radius: 8px 8px 0px 0px;
-        padding: 10px 20px;
-        color: #2E7D32;
-        font-weight: bold;
+        background-color: transparent !important;
+        border-radius: 12px !important;
+        padding: 10px 24px !important;
+        color: #2E7D32 !important;
+        font-weight: 500 !important;
+        border: none !important;
+        transition: all 0.25s ease !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: rgba(232, 245, 233, 0.8) !important;
+        color: #1B5E20 !important;
     }
     .stTabs [aria-selected="true"] {
         background-color: #2E7D32 !important;
         color: white !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15) !important;
     }
     
-    /* Card design */
+    /* Herb Cards Glassmorphism styling */
     .herb-card {
-        background-color: #F9FBE7;
-        padding: 20px;
-        border-left: 5px solid #2E7D32;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+        background: linear-gradient(145deg, #ffffff 0%, #fcfdfe 100%) !important;
+        border-left: 6px solid #2E7D32 !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.03) !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.03) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        margin-bottom: 20px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    .herb-card:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: 0 12px 30px rgba(46, 125, 50, 0.08) !important;
+        border-left-color: #1B5E20 !important;
+    }
+    
+    /* Interactive Hero banner styling */
+    .hero-container {
+        background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%) !important;
+        padding: 40px 32px !important;
+        border-radius: 24px !important;
+        margin-bottom: 35px !important;
+        box-shadow: 0 10px 30px rgba(46, 125, 50, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.6) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    .hero-badge {
+        background-color: #2E7D32 !important;
+        color: white !important;
+        padding: 6px 16px !important;
+        border-radius: 50px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        letter-spacing: 1.5px !important;
+        display: inline-block !important;
+        margin-bottom: 16px !important;
+        box-shadow: 0 2px 10px rgba(46, 125, 50, 0.2) !important;
+    }
+    .hero-title {
+        font-size: 36px !important;
+        font-weight: 800 !important;
+        margin: 0 0 12px 0 !important;
+        line-height: 1.25 !important;
+        background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+    }
+    .hero-subtitle {
+        font-size: 16px !important;
+        color: #33691E !important;
+        margin: 0 !important;
+        font-weight: 400 !important;
+        max-width: 800px !important;
+        line-height: 1.5 !important;
+    }
+    
+    /* Custom Badges */
+    .badge-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        padding: 4px 14px !important;
+        border-radius: 50px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        margin-right: 8px !important;
+    }
+    .badge-emerald {
+        background-color: #E8F5E9 !important;
+        color: #2E7D32 !important;
+        border: 1px solid rgba(46, 125, 50, 0.2) !important;
+    }
+    .badge-orange {
+        background-color: #FFF3E0 !important;
+        color: #E65100 !important;
+        border: 1px solid rgba(230, 81, 0, 0.2) !important;
+    }
+    .badge-blue {
+        background-color: #E3F2FD !important;
+        color: #1565C0 !important;
+        border: 1px solid rgba(21, 101, 192, 0.2) !important;
+    }
+    
+    /* Alert Overrides for Glassmorphism styling */
+    .stAlert {
+        border-radius: 16px !important;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        background-color: rgba(255,255,255,0.6) !important;
+        backdrop-filter: blur(8px) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
+    }
+    
+    /* Premium Table styling */
+    table {
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+        width: 100% !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        border: 1px solid #E2E8F0 !important;
+    }
+    th {
+        background-color: #E8F5E9 !important;
+        color: #1B5E20 !important;
+        font-weight: 600 !important;
+        padding: 12px 16px !important;
+        text-align: left !important;
+        border-bottom: 2px solid #C8E6C9 !important;
+    }
+    td {
+        padding: 12px 16px !important;
+        border-bottom: 1px solid #E2E8F0 !important;
+        background-color: white !important;
+    }
+    tr:last-child td {
+        border-bottom: none !important;
+    }
+    
+    /* Expert Feedback Panel */
+    .feedback-panel {
+        background: rgba(255, 255, 255, 0.5) !important;
+        border: 1px dashed #A5D6A7 !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        margin-top: 24px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.01) !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-st.title("🌿 Herbal Plant Detection and Recognition (DRHP)")
-st.write("Automated identification and ethnobotanical diagnostics of indigenous Ugandan herbal plants.")
+st.markdown(
+    """
+    <div class="hero-container">
+        <span class="hero-badge">🌿 DRHP PROTOCOL</span>
+        <h1 class="hero-title">Herbal Plant Detection & Recognition</h1>
+        <p class="hero-subtitle">Artificial intelligence for indigenous Ugandan ethnobotanical diagnostics and automated leaf analysis.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Sidebar settings for resizing images and display
 st.sidebar.image("logo.png", width=120)
@@ -521,11 +718,24 @@ def process_and_display(image):
                     st.markdown(
                         f"""
                         <div class="herb-card">
-                            <h3 style="color: #1B5E20; margin-top: 0; margin-bottom: 8px;">🌿 Recommendation: {local_name}</h3>
-                            <p style="margin: 4px 0;"><b>Scientific Name:</b> <i>{sci_name}</i></p>
-                            <p style="margin: 4px 0;"><b>DRHP Confidence:</b> <span style="color: #2E7D32; font-weight: bold;">{conf:.2%}</span></p>
-                            <p style="margin: 4px 0;"><b>What it Heals:</b> {treats}</p>
-                            <p style="margin: 4px 0;"><b>Administration & Preparation:</b> {prep}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 16px; gap: 8px;">
+                                <h3 style="color: #1B5E20; margin: 0; font-size: 22px; font-weight: 700;">🌿 {local_name}</h3>
+                                <div>
+                                    <span class="badge-pill badge-emerald">Confidence: {conf:.2%}</span>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; font-weight: 600; display: block; margin-bottom: 2px;">Scientific Classification</span>
+                                <span style="font-size: 16px; font-style: italic; color: #2D3748; font-weight: 500;">{sci_name}</span>
+                            </div>
+                            <div style="margin-bottom: 16px; background-color: rgba(232, 245, 233, 0.3); padding: 12px 16px; border-radius: 8px; border-left: 3px solid #2E7D32;">
+                                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #2E7D32; font-weight: 600; display: block; margin-bottom: 2px;">Therapeutic Indications</span>
+                                <span style="font-size: 15px; color: #2D3748;">{treats}</span>
+                            </div>
+                            <div>
+                                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; font-weight: 600; display: block; margin-bottom: 2px;">Traditional Preparation & Usage</span>
+                                <span style="font-size: 15px; color: #4A5568; line-height: 1.6;">{prep}</span>
+                            </div>
                         </div>
                         """,
                         unsafe_allow_html=True
@@ -594,14 +804,26 @@ def process_and_display(image):
                         )
                         st.write("---")
 
-    st.subheader("👨‍🔬 Active Learning: Expert Feedback")
-    st.write("Did the model make a mistake? Help it learn by providing the correct label!")
+    st.markdown(
+        """
+        <div class="feedback-panel">
+            <h3 style="margin-top:0; color:#1B5E20; display:flex; align-items:center; gap:8px; font-size:18px; font-weight: 700;">
+                <span>👨‍🔬</span> Expert Feedback Loop (Active Learning)
+            </h3>
+            <p style="font-size:14px; color:#4A5568; margin-bottom:0;">
+                If the model misclassified the plant in this frame, help retrain it by selecting the correct ground-truth label below and exporting the sample to feed back into the training pipeline.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.write("")
     
     # Get list of classes from the model
     class_names = list(model.names.values())
     
     # Dropdown for expert correction
-    correct_label = st.selectbox("Select the true plant species:", ["-- Select True Label --"] + class_names)
+    correct_label = st.selectbox("Select the true plant species classification:", ["-- Select True Label --"] + class_names)
     
     if correct_label != "-- Select True Label --":
         # Convert original numpy image to bytes for download
@@ -736,23 +958,43 @@ with tab_symptoms:
                         if score >= 6:
                             match_level = "High Match"
                             match_color = "#2E7D32" # Dark Green
+                            badge_class = "badge-emerald"
                         elif score >= 3:
                             match_level = "Medium Match"
                             match_color = "#F57C00" # Orange
+                            badge_class = "badge-orange"
                         else:
                             match_level = "Partial Match"
                             match_color = "#1565C0" # Blue
+                            badge_class = "badge-blue"
                             
                         matched_kws_str = ", ".join(matched_kws)
                         
                         st.markdown(
                             f"""
-                            <div class="herb-card" style="border-left: 5px solid {match_color};">
-                                <h3 style="color: #1B5E20; margin-top: 0; margin-bottom: 8px;">🌿 {local_name}</h3>
-                                <p style="margin: 4px 0;"><b>Scientific Name:</b> <i>{sci_name}</i></p>
-                                <p style="margin: 4px 0;"><b>Relevance Level:</b> <span style="color: {match_color}; font-weight: bold;">{match_level}</span> (matched: <i>{matched_kws_str}</i>)</p>
-                                <p style="margin: 4px 0;"><b>What it Heals:</b> {treats}</p>
-                                <p style="margin: 4px 0;"><b>Administration & Preparation:</b> {prep}</p>
+                            <div class="herb-card" style="border-left: 6px solid {match_color} !important;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 16px; gap: 8px;">
+                                    <h3 style="color: #1B5E20; margin: 0; font-size: 22px; font-weight: 700;">🌿 {local_name}</h3>
+                                    <div>
+                                        <span class="badge-pill {badge_class}">{match_level}</span>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; font-weight: 600; display: block; margin-bottom: 2px;">Scientific Classification</span>
+                                    <span style="font-size: 16px; font-style: italic; color: #2D3748; font-weight: 500;">{sci_name}</span>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; font-weight: 600; display: block; margin-bottom: 2px;">Matched Keywords</span>
+                                    <span style="font-size: 14px; color: #4A5568; background-color: #F7FAF6; padding: 4px 8px; border-radius: 4px; border: 1px solid #E2E8F0; display: inline-block;">{matched_kws_str}</span>
+                                </div>
+                                <div style="margin-bottom: 16px; background-color: rgba(232, 245, 233, 0.3); padding: 12px 16px; border-radius: 8px; border-left: 3px solid #2E7D32;">
+                                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #2E7D32; font-weight: 600; display: block; margin-bottom: 2px;">Therapeutic Indications</span>
+                                    <span style="font-size: 15px; color: #2D3748;">{treats}</span>
+                                </div>
+                                <div>
+                                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; font-weight: 600; display: block; margin-bottom: 2px;">Traditional Preparation & Usage</span>
+                                    <span style="font-size: 15px; color: #4A5568; line-height: 1.6;">{prep}</span>
+                                </div>
                             </div>
                             """,
                             unsafe_allow_html=True
@@ -804,8 +1046,15 @@ with tab_symptoms:
 
 # Populate Encyclopedia Tab
 with tab_encyclopedia:
-    st.header("📖 Ethnobotanical Encyclopedia")
-    st.write("Search and browse details for all 17 plant species supported by the DRHP model.")
+    st.markdown(
+        """
+        <div style="margin-bottom: 24px;">
+            <h2 style="color: #1B5E20; margin-bottom: 8px;">📖 Ethnobotanical Encyclopedia</h2>
+            <p style="color: #4A5568; font-size: 15px;">Search and browse details for all 17 plant species supported by the DRHP model.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
     search_query = st.text_input("🔍 Search herbs by name, scientific classification, or illnesses treated:", "")
     st.write("---")
@@ -823,14 +1072,37 @@ with tab_encyclopedia:
                  
         if not search_query or match:
             with st.expander(f"🌿 {local} ({scientific})", expanded=False):
-                st.markdown(f"**Scientific Name:** _{scientific}_")
-                st.markdown(f"**What it Heals:** {treats}")
-                st.markdown(f"**Preparation & Administration:** {preparation}")
+                st.markdown(
+                    f"""
+                    <div style="background-color: white; padding: 18px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.03);">
+                        <div style="margin-bottom: 12px;">
+                            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; font-weight: 600; display: block; margin-bottom: 2px;">Scientific Name</span>
+                            <span style="font-size: 16px; font-style: italic; color: #1B5E20; font-weight: 600;">{scientific}</span>
+                        </div>
+                        <div style="margin-bottom: 12px; border-top: 1px solid #edf2f7; padding-top: 10px;">
+                            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #2E7D32; font-weight: 600; display: block; margin-bottom: 2px;">Illnesses & Conditions Treated</span>
+                            <span style="font-size: 14px; color: #2D3748;">{treats}</span>
+                        </div>
+                        <div style="border-top: 1px solid #edf2f7; padding-top: 10px;">
+                            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; font-weight: 600; display: block; margin-bottom: 2px;">Traditional Preparation & Administration</span>
+                            <span style="font-size: 14px; color: #4A5568; line-height: 1.6;">{preparation}</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
 # Populate Statistics Tab
 with tab_stats:
-    st.header("📊 Model Performance & Training Curves")
-    st.write("Quantitative metrics comparing performance benchmarks across model versions.")
+    st.markdown(
+        """
+        <div style="margin-bottom: 24px;">
+            <h2 style="color: #1B5E20; margin-bottom: 8px;">📊 Model Performance & Training Curves</h2>
+            <p style="color: #4A5568; font-size: 15px;">Quantitative metrics comparing performance benchmarks across model versions.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
     st.markdown(
         """
@@ -847,37 +1119,69 @@ with tab_stats:
         | **Box Precision** | 83.98% | 72.60% | **55.20%** |
         | **Box Recall** | 63.40% | 56.50% | **58.20%** |
         
-        ### Key Achievements in V3
-        * **Resolved Leakage**: Corrected training validation set mapping.
-        * **Rare Class Recovery**: Additional smart-polygon annotations in V3 yielded major leaps on underrepresented species:
-          * *Mugavu* improved from **0.00%** in V2 to **79.14%** in V3.
-          * *Olweza* improved from **1.50%** in V2 to **43.25%** in V3.
-          * New class *Nnabbbugira* successfully detected at **48.72%** mAP50.
-        """
+        <br>
+        
+        <div class="herb-card" style="border-left: 6px solid #2E7D32 !important; background: white !important;">
+            <h3 style="margin-top:0; color:#1B5E20; font-size:18px; font-weight:700;">💡 Key Achievements & Version 3 Upgrades</h3>
+            <ul style="margin: 0; padding-left: 20px; font-size: 14.5px; color: #4A5568; line-height: 1.8;">
+                <li><b>Resolved Validation Leakage</b>: Corrected training set validation mapping to prevent over-optimistic evaluation curves.</li>
+                <li><b>Rare Class Recall Recovery</b>: Additional smart-polygon annotations in V3 yielded major detection leaps on underrepresented species:
+                    <ul style="padding-left: 15px; margin-top: 4px;">
+                        <li><i>Mugavu</i> improved from <span style="color:#e53e3e; font-weight:bold;">0.00%</span> to <span style="color:#2e7d32; font-weight:bold;">79.14%</span> mAP@50.</li>
+                        <li><i>Olweza</i> improved from <span style="color:#e53e3e; font-weight:bold;">1.50%</span> to <span style="color:#2e7d32; font-weight:bold;">43.25%</span> mAP@50.</li>
+                    </ul>
+                </li>
+                <li><b>New Species Inclusion</b>: Successfully initiated robust detection for the water mint class <i>Nnabbbugira</i> at <span style="color:#2e7d32; font-weight:bold;">48.72%</span> mAP@50.</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 # Populate Info/XAI Tab
 with tab_info:
-    st.header("💡 System Information & Explainable AI")
+    st.markdown(
+        """
+        <div style="margin-bottom: 24px;">
+            <h2 style="color: #1B5E20; margin-bottom: 8px;">💡 System Information & Explainable AI</h2>
+            <p style="color: #4A5568; font-size: 15px;">Under the hood of the DRHP herbal diagnostics classification protocol.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
     col_x, col_y = st.columns(2)
     with col_x:
-        st.subheader("Image Preprocessing")
-        st.write("To standardize lighting, shadows, and glares in real-world captures, the app preprocesses input frames:")
         st.markdown(
             """
-            * **CLAHE**: Enhances leaf contrast locally without amplifying image noise, making leaf veins and margins stand out.
-            * **HSV Color Normalization**: Ignores raw luminance variations, making features robust to shadow and direct sunlight.
-            """
+            <div class="herb-card" style="height: 100%;">
+                <h3 style="color: #1B5E20; margin-top: 0; font-size: 18px; font-weight: 700;">🖼️ Image Preprocessing Pipeline</h3>
+                <p style="font-size: 14px; color: #4A5568; line-height: 1.65; margin-bottom: 12px;">
+                    To standardize lighting, shadows, and color glares in real-world smartphone frame captures, the app integrates classic image filters:
+                </p>
+                <ul style="font-size: 14px; color: #4A5568; line-height: 1.8; padding-left: 20px; margin: 0;">
+                    <li><b>CLAHE (Contrast Limited Adaptive Histogram Equalization)</b>: Enhances local contrast of leaf surfaces without amplifying sensor noise, highlighting venation and texture patterns.</li>
+                    <li><b>HSV Color Space Conversion</b>: Decouples luminance from color chrominance, making the YOLOv8-seg backbone robust to shadow lines and direct sunlight variations.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
     with col_y:
-        st.subheader("Explainable AI (XAI)")
-        st.write("To support transparency, the system highlights texture gradients and edge segments:")
         st.markdown(
             """
-            * **Saliency Feature Heatmaps**: Outlines key structural edges and vein nodes utilized by the CNN backbone.
-            * **Active Learning loop**: Integrates expert-in-the-loop dropdown corrections to save mislabeled frames for future model training iterations.
-            """
+            <div class="herb-card" style="height: 100%;">
+                <h3 style="color: #1B5E20; margin-top: 0; font-size: 18px; font-weight: 700;">🧠 Deep Learning & Interpretability</h3>
+                <p style="font-size: 14px; color: #4A5568; line-height: 1.65; margin-bottom: 12px;">
+                    Providing visibility and standard verification tools into the deep convolutional network's class prediction pathways:
+                </p>
+                <ul style="font-size: 14px; color: #4A5568; line-height: 1.8; padding-left: 20px; margin: 0;">
+                    <li><b>Saliency Feature Heatmaps</b>: Uses deep feature activations to outline critical leaf margins and vein nodes prioritized by the CNN model.</li>
+                    <li><b>Expert Human-in-the-Loop</b>: Facilitates continuous active learning by allowing trained botanists to override low-confidence predictions and export the corrected labels.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
 st.markdown("---")
